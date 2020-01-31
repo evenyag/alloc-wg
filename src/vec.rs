@@ -90,7 +90,7 @@ use core::{
     fmt,
     hash::{self, Hash},
     intrinsics::assume,
-    iter::{FromIterator, FusedIterator, TrustedLen},
+    iter::{FromIterator, FusedIterator},
     mem,
     ops::{
         self,
@@ -102,6 +102,8 @@ use core::{
     ptr::{self, NonNull},
     slice::{self, SliceIndex},
 };
+#[cfg(feature = "use_nightly")]
+use core::iter::TrustedLen;
 
 /// A contiguous growable array type, written `Vec<T>` but pronounced 'vector'.
 ///
@@ -1843,6 +1845,7 @@ impl<T: Clone, A: ReallocRef> Vec<T, A> {
     /// # Panics
     ///
     /// Panics if the reallocation fails.
+    #[cfg(feature = "use_nightly")]
     pub fn extend_from_slice(&mut self, other: &[T])
     where
         A: Abort,
@@ -1850,9 +1853,23 @@ impl<T: Clone, A: ReallocRef> Vec<T, A> {
         self.spec_extend(other.iter())
     }
 
+    #[cfg(not(feature = "use_nightly"))]
+    pub fn extend_from_slice(&mut self, other: &[T])
+    where
+        A: Abort,
+    {
+        self.spec_extend(other.iter().cloned())
+    }
+
     /// Same as `extend_from_slice` but returns errors instead of panicking
+    #[cfg(feature = "use_nightly")]
     pub fn try_extend_from_slice(&mut self, other: &[T]) -> Result<(), CollectionAllocErr<A>> {
         self.try_spec_extend(other.iter())
+    }
+
+    #[cfg(not(feature = "use_nightly"))]
+    pub fn try_extend_from_slice(&mut self, other: &[T]) -> Result<(), CollectionAllocErr<A>> {
+        self.try_spec_extend(other.iter().cloned())
     }
 }
 
@@ -2020,6 +2037,7 @@ where
 }
 
 #[doc(hidden)]
+#[cfg(feature = "use_nightly")]
 pub fn try_from_elem_in<T: Clone, A: ReallocRef>(
     elem: T,
     n: usize,
@@ -2028,11 +2046,24 @@ pub fn try_from_elem_in<T: Clone, A: ReallocRef>(
     <T as SpecFromElem<A>>::try_from_elem_in(elem, n, a)
 }
 
+#[cfg(not(feature = "use_nightly"))]
+pub fn try_from_elem_in<T: Clone, A: ReallocRef>(
+    elem: T,
+    n: usize,
+    a: A,
+) -> Result<Vec<T, A>, CollectionAllocErr<A>> {
+    let mut v = Vec::try_with_capacity_in(n, a)?;
+    v.try_extend_with(n, ExtendElement(elem))?;
+    Ok(v)
+}
+
 // Specialization trait used for Vec::from_elem
+#[cfg(feature = "use_nightly")]
 trait SpecFromElem<A: AllocRef>: Sized {
     fn try_from_elem_in(elem: Self, n: usize, a: A) -> Result<Vec<Self, A>, CollectionAllocErr<A>>;
 }
 
+#[cfg(feature = "use_nightly")]
 impl<T: Clone, A: ReallocRef> SpecFromElem<A> for T {
     default fn try_from_elem_in(
         elem: Self,
@@ -2046,6 +2077,7 @@ impl<T: Clone, A: ReallocRef> SpecFromElem<A> for T {
 }
 
 #[allow(clippy::use_self)]
+#[cfg(feature = "use_nightly")]
 impl<A: ReallocRef> SpecFromElem<A> for u8 {
     #[inline]
     fn try_from_elem_in(elem: Self, n: usize, a: A) -> Result<Vec<Self, A>, CollectionAllocErr<A>> {
@@ -2064,6 +2096,7 @@ impl<A: ReallocRef> SpecFromElem<A> for u8 {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<T: Clone + IsZero, A: ReallocRef> SpecFromElem<A> for T {
     #[inline]
     fn try_from_elem_in(elem: Self, n: usize, a: A) -> Result<Vec<Self, A>, CollectionAllocErr<A>> {
@@ -2247,14 +2280,23 @@ impl<T, A: DeallocRef> ops::DerefMut for Vec<T, A> {
 }
 
 impl<T> FromIterator<T> for Vec<T> {
+    #[cfg(feature = "use_nightly")]
     #[inline]
     #[must_use]
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         <Self as SpecExtend<T, I::IntoIter, Global>>::from_iter_in(iter.into_iter(), Global)
     }
+
+    #[cfg(not(feature = "use_nightly"))]
+    #[inline]
+    #[must_use]
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        Self::from_iter_in(iter.into_iter(), Global)
+    }
 }
 
 impl<T, A: ReallocRef> FromIteratorIn<T, A> for Vec<T, A> {
+    #[cfg(feature = "use_nightly")]
     #[inline]
     #[must_use]
     fn from_iter_in<I: IntoIterator<Item = T>>(iter: I, a: A) -> Self
@@ -2264,12 +2306,32 @@ impl<T, A: ReallocRef> FromIteratorIn<T, A> for Vec<T, A> {
         <Self as SpecExtend<T, I::IntoIter, A>>::from_iter_in(iter.into_iter(), a)
     }
 
+    #[cfg(not(feature = "use_nightly"))]
+    #[inline]
+    #[must_use]
+    fn from_iter_in<I: IntoIterator<Item = T>>(iter: I, a: A) -> Self
+    where
+        A: Abort,
+    {
+        Self::from_iter_in(iter.into_iter(), a)
+    }
+
+    #[cfg(feature = "use_nightly")]
     #[inline]
     fn try_from_iter_in<I: IntoIterator<Item = T>>(
         iter: I,
         a: A,
     ) -> Result<Self, CollectionAllocErr<A>> {
         <Self as SpecExtend<T, I::IntoIter, A>>::try_from_iter_in(iter.into_iter(), a)
+    }
+
+    #[cfg(not(feature = "use_nightly"))]
+    #[inline]
+    fn try_from_iter_in<I: IntoIterator<Item = T>>(
+        iter: I,
+        a: A,
+    ) -> Result<Self, CollectionAllocErr<A>> {
+        Self::try_from_iter_in(iter.into_iter(), a)
     }
 }
 
@@ -2337,21 +2399,36 @@ impl<T, A> Extend<T> for Vec<T, A>
 where
     A: ReallocRef + Abort,
 {
+    #[cfg(feature = "use_nightly")]
     #[inline]
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
         <Self as SpecExtend<T, I::IntoIter, A>>::spec_extend(self, iter.into_iter())
+    }
+
+    #[cfg(not(feature = "use_nightly"))]
+    #[inline]
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        self.spec_extend(iter.into_iter())
     }
 }
 
 impl<T, A: ReallocRef> TryExtend<T> for Vec<T, A> {
     type Err = CollectionAllocErr<A>;
 
+    #[cfg(feature = "use_nightly")]
     #[inline]
     fn try_extend<I: IntoIterator<Item = T>>(&mut self, iter: I) -> Result<(), Self::Err> {
         <Self as SpecExtend<T, I::IntoIter, A>>::try_spec_extend(self, iter.into_iter())
     }
+
+    #[cfg(not(feature = "use_nightly"))]
+    #[inline]
+    fn try_extend<I: IntoIterator<Item = T>>(&mut self, iter: I) -> Result<(), Self::Err> {
+        self.try_spec_extend(iter.into_iter())
+    }
 }
 
+#[cfg(feature = "use_nightly")]
 trait SpecExtend<T, I, A: AllocRef>: Sized {
     #[inline]
     fn from_iter_in(iter: I, a: A) -> Self
@@ -2374,6 +2451,7 @@ trait SpecExtend<T, I, A: AllocRef>: Sized {
     fn try_spec_extend(&mut self, iter: I) -> Result<(), CollectionAllocErr<A>>;
 }
 
+#[cfg(feature = "use_nightly")]
 impl<T, I, A> SpecExtend<T, I, A> for Vec<T, A>
 where
     I: Iterator<Item = T>,
@@ -2406,6 +2484,7 @@ where
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<T, I, A: ReallocRef> SpecExtend<T, I, A> for Vec<T, A>
 where
     I: TrustedLen<Item = T>,
@@ -2446,6 +2525,7 @@ where
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<T, A: ReallocRef> SpecExtend<T, IntoIter<T, A>, A> for Vec<T, A> {
     fn try_from_iter_in(iter: IntoIter<T, A>, mut a: A) -> Result<Self, CollectionAllocErr<A>> {
         // A common case is passing a vector into a function which immediately
@@ -2479,6 +2559,7 @@ impl<T, A: ReallocRef> SpecExtend<T, IntoIter<T, A>, A> for Vec<T, A> {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<'a, T: 'a, I, A: ReallocRef> SpecExtend<&'a T, I, A> for Vec<T, A>
 where
     I: Iterator<Item = &'a T>,
@@ -2493,6 +2574,7 @@ where
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<'a, T: 'a, A: ReallocRef> SpecExtend<&'a T, slice::Iter<'a, T>, A> for Vec<T, A>
 where
     T: Copy,
@@ -2506,6 +2588,48 @@ where
             self.get_unchecked_mut(len..).copy_from_slice(slice);
         }
         Ok(())
+    }
+}
+
+#[cfg(not(feature = "use_nightly"))]
+impl<T, A: ReallocRef + Abort> Vec<T, A> {
+    #[inline]
+    fn from_iter_in<I: Iterator<Item = T>>(iter: I, a: A) -> Self {
+        handle_collection_alloc_error_audited(Self::try_from_iter_in(iter, a))
+    }
+
+    #[inline]
+    fn spec_extend<I: Iterator<Item = T>>(&mut self, iter: I) {
+        handle_collection_alloc_error_audited(self.try_spec_extend(iter))
+    }
+}
+
+#[cfg(not(feature = "use_nightly"))]
+impl<T, A: ReallocRef> Vec<T, A> {
+    fn try_from_iter_in<I: Iterator<Item = T>>(mut iter: I, a: A) -> Result<Self, CollectionAllocErr<A>> {
+        // Unroll the first iteration, as the vector is going to be
+        // expanded on this iteration in every case when the iterable is not
+        // empty, but the loop in extend_desugared() is not going to see the
+        // vector being full in the few subsequent loop iterations.
+        // So we get better branch prediction.
+        let mut vector = match iter.next() {
+            None => return Ok(Self::new_in(a)),
+            Some(element) => {
+                let (lower, _) = iter.size_hint();
+                let mut vector = Self::try_with_capacity_in(lower.saturating_add(1), a)?;
+                unsafe {
+                    ptr::write(vector.get_unchecked_mut(0), element);
+                    vector.set_len(1);
+                }
+                vector
+            }
+        };
+        vector.try_spec_extend(iter)?;
+        Ok(vector)
+    }
+
+    fn try_spec_extend<I: Iterator<Item = T>>(&mut self, iter: I) -> Result<(), CollectionAllocErr<A>> {
+        self.try_extend_desugared(iter)
     }
 }
 
@@ -2881,6 +3005,7 @@ impl From<&str> for Vec<u8> {
 /// [`Vec`]: struct.Vec.html
 /// [`IntoIterator`]: ../../std/iter/trait.IntoIterator.html
 pub struct IntoIter<T, A: DeallocRef = Global> {
+    #[cfg_attr(not(feature = "use_nightly"), allow(unused))]
     buf: RawVec<T, A>,
     ptr: *const T,
     end: *const T,

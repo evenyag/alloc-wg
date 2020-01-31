@@ -55,6 +55,8 @@
     coerce_unsized,
     dispatch_from_dyn,
     unsize,
+    specialization,
+    trusted_len,
 ))]
 #![feature(
     dropck_eyepatch,
@@ -69,8 +71,8 @@
     const_generics,
     const_generic_impls_guard,
     unboxed_closures,
-    specialization,
-    trusted_len,
+    // specialization,
+    // trusted_len,
     // unsized_locals,
     fn_traits,
     // exhaustive_patterns,

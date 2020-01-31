@@ -764,6 +764,7 @@ fn assert_covariance() {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 #[test]
 fn from_into_inner() {
     let vec = vec![1, 2, 3];
@@ -771,6 +772,21 @@ fn from_into_inner() {
     let vec = vec.into_iter().collect::<Vec<_>>();
     assert_eq!(vec, [1, 2, 3]);
     assert_eq!(vec.as_ptr(), ptr);
+
+    let ptr = &vec[1] as *const _;
+    let mut it = vec.into_iter();
+    it.next().unwrap();
+    let vec = it.collect::<Vec<_>>();
+    assert_eq!(vec, [2, 3]);
+    assert_ne!(ptr, vec.as_ptr());
+}
+
+#[cfg(not(feature = "use_nightly"))]
+#[test]
+fn from_into_inner() {
+    let vec = vec![1, 2, 3];
+    let vec = vec.into_iter().collect::<Vec<_>>();
+    assert_eq!(vec, [1, 2, 3]);
 
     let ptr = &vec[1] as *const _;
     let mut it = vec.into_iter();
