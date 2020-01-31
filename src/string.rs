@@ -56,7 +56,7 @@ use crate::{
     boxed::Box,
     collections::CollectionAllocErr,
     iter::TryExtend,
-    str::from_boxed_utf8_unchecked,
+    str::{self, from_boxed_utf8_unchecked, lossy, Chars, FromStr, Utf8Error},
     vec::Vec,
 };
 use core::{
@@ -74,7 +74,6 @@ use core::{
         RangeBounds,
     },
     ptr,
-    str::{self, lossy, Chars, FromStr, Utf8Error},
 };
 
 #[cfg(feature = "std")]

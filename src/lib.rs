@@ -61,7 +61,7 @@
     // coerce_unsized,
     // const_if_match,
     core_intrinsics,
-    str_internals,
+    // str_internals,
     // dispatch_from_dyn,
     // unsize,
     exact_size_is_empty,
