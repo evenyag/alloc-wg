@@ -465,6 +465,7 @@ impl Abort for Global {}
 #[cfg(feature = "std")]
 impl Abort for System {}
 
+#[cfg(feature = "use_nightly")]
 impl<T> Abort for T where T: AllocRef<Error = !> {}
 
 // One central function responsible for reporting capacity overflows. This'll

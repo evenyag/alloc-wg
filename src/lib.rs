@@ -57,6 +57,7 @@
     unsize,
     specialization,
     trusted_len,
+    never_type,
 ))]
 #![feature(
     dropck_eyepatch,
@@ -76,7 +77,7 @@
     // unsized_locals,
     fn_traits,
     // exhaustive_patterns,
-    never_type
+    // never_type
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![doc(test(attr(
