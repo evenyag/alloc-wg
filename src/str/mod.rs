@@ -44,6 +44,7 @@ pub use liballoc::str::{
 
 pub mod lossy;
 
+#[rustfmt::skip]
 // https://tools.ietf.org/html/rfc3629
 static UTF8_CHAR_WIDTH: [u8; 256] = [
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,

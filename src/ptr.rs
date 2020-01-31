@@ -152,9 +152,19 @@ impl<T: ?Sized> From<NonNull<T>> for Unique<T> {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<T: ?Sized> From<Unique<T>> for NonNull<T> {
     #[inline]
     fn from(p: Unique<T>) -> Self {
         unsafe { Self::new_unchecked(p.as_ptr()) }
+    }
+}
+
+// To compatible with old version of Rust
+#[cfg(not(feature = "use_nightly"))]
+impl<T: ?Sized> Into<NonNull<T>> for Unique<T> {
+   #[inline]
+    fn into(self) -> NonNull<T> {
+        unsafe { NonNull::new_unchecked(self.as_ptr()) }
     }
 }

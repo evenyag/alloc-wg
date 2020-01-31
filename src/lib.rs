@@ -67,26 +67,7 @@
     core_intrinsics,
     dropck_eyepatch,
 ))]
-#![feature(
-    // dropck_eyepatch,
-    // coerce_unsized,
-    // const_if_match,
-    // core_intrinsics,
-    // str_internals,
-    // dispatch_from_dyn,
-    // unsize,
-    // exact_size_is_empty,
-    // receiver_trait,
-    // const_generics,
-    // const_generic_impls_guard,
-    // unboxed_closures,
-    // specialization,
-    // trusted_len,
-    // unsized_locals,
-    // fn_traits,
-    // exhaustive_patterns,
-    // never_type
-)]
+#![cfg_attr(feature = "use_nightly", allow(incomplete_features))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![doc(test(attr(
     deny(
@@ -119,7 +100,7 @@
     unused_lifetimes,
     unused_qualifications
 )]
-#![allow(clippy::module_name_repetitions, incomplete_features)]
+#![allow(clippy::module_name_repetitions)]
 
 pub mod alloc;
 pub mod boxed;
