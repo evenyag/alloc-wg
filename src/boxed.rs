@@ -1105,6 +1105,7 @@ impl<A: DeallocRef> From<Box<str, A>> for Box<[u8], A> {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 #[allow(clippy::use_self)]
 impl<T, const N: usize> core::convert::TryFrom<Box<[T]>> for Box<[T; N]>
 where

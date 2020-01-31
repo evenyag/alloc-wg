@@ -2826,7 +2826,9 @@ __impl_slice_eq1! { [A] Vec<T, A>, &mut [U], A: DeallocRef }
 // __impl_slice_eq1! { [] Cow<'_, [A]>, &[B], A: Clone }
 // __impl_slice_eq1! { [] Cow<'_, [A]>, &mut [B], A: Clone }
 // __impl_slice_eq1! { [] Cow<'_, [A]>, Vec<B>, A: Clone }
+#[cfg(feature = "use_nightly")]
 __impl_slice_eq1! { [A, const N: usize] Vec<T, A>, [U; N], [U; N]: core::array::LengthAtMost32, A: DeallocRef }
+#[cfg(feature = "use_nightly")]
 __impl_slice_eq1! { [A, const N: usize] Vec<T, A>, &[U; N], [U; N]: core::array::LengthAtMost32, A: DeallocRef }
 
 // NOTE: some less important impls are omitted to reduce code bloat
@@ -2835,6 +2837,29 @@ __impl_slice_eq1! { [A, const N: usize] Vec<T, A>, &[U; N], [U; N]: core::array:
 //__impl_slice_eq1! { [const N: usize] Cow<'a, [A]>, [B; N], [B; N]: LengthAtMost32 }
 //__impl_slice_eq1! { [const N: usize] Cow<'a, [A]>, &[B; N], [B; N]: LengthAtMost32 }
 //__impl_slice_eq1! { [const N: usize] Cow<'a, [A]>, &mut [B; N], [B; N]: LengthAtMost32 }
+
+#[cfg(not(feature = "use_nightly"))]
+macro_rules! array_impls {
+    ($($N: expr)+) => {
+        $(
+            // NOTE: some less important impls are omitted to reduce code bloat
+            __impl_slice_eq1! { [A] Vec<T, A>, [U; $N], A: DeallocRef }
+            __impl_slice_eq1! { [A] Vec<T, A>, &[U; $N], A: DeallocRef }
+            // __impl_slice_eq1! { Vec<A>, &'b mut [B; $N] }
+            // __impl_slice_eq1! { Cow<'a, [A]>, [B; $N], Clone }
+            // __impl_slice_eq1! { Cow<'a, [A]>, &'b [B; $N], Clone }
+            // __impl_slice_eq1! { Cow<'a, [A]>, &'b mut [B; $N], Clone }
+        )+
+    }
+}
+
+#[cfg(not(feature = "use_nightly"))]
+array_impls! {
+     0  1  2  3  4  5  6  7  8  9
+    10 11 12 13 14 15 16 17 18 19
+    20 21 22 23 24 25 26 27 28 29
+    30 31 32
+}
 
 /// Implements comparison of vectors, lexicographically.
 impl<T: PartialOrd, A: DeallocRef, B: DeallocRef> PartialOrd<Vec<T, B>> for Vec<T, A> {

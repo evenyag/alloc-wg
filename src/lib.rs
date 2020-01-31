@@ -62,6 +62,8 @@
     receiver_trait,
     unboxed_closures,
     fn_traits,
+    const_generics,
+    const_generic_impls_guard,
 ))]
 #![feature(
     dropck_eyepatch,
@@ -73,8 +75,8 @@
     // unsize,
     // exact_size_is_empty,
     // receiver_trait,
-    const_generics,
-    const_generic_impls_guard,
+    // const_generics,
+    // const_generic_impls_guard,
     // unboxed_closures,
     // specialization,
     // trusted_len,
