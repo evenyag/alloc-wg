@@ -1,8 +1,12 @@
 use core::{
     convert::From,
-    marker::{PhantomData, Unsize},
-    ops::{CoerceUnsized, DispatchFromDyn},
+    marker::PhantomData,
     ptr::NonNull,
+};
+#[cfg(feature = "use_nightly")]
+use core::{
+    marker::Unsize,
+    ops::{CoerceUnsized, DispatchFromDyn},
 };
 
 // ignore-tidy-undocumented-unsafe
@@ -135,8 +139,10 @@ impl<T: ?Sized> Clone for Unique<T> {
 
 impl<T: ?Sized> Copy for Unique<T> {}
 
+#[cfg(feature = "use_nightly")]
 impl<T: ?Sized, U: ?Sized> CoerceUnsized<Unique<U>> for Unique<T> where T: Unsize<U> {}
 
+#[cfg(feature = "use_nightly")]
 impl<T: ?Sized, U: ?Sized> DispatchFromDyn<Unique<U>> for Unique<T> where T: Unsize<U> {}
 
 impl<T: ?Sized> From<NonNull<T>> for Unique<T> {

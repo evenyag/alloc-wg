@@ -81,19 +81,6 @@ impl<D: DeallocRef> BorrowMut<str> for String<D> {
 
 /// Converts a boxed slice of bytes to a boxed string slice without checking
 /// that the string contains valid UTF-8.
-///
-/// # Examples
-///
-/// Basic usage:
-///
-/// ```
-/// use alloc_wg::boxed::Box;
-///
-/// let smile_utf8 = Box::new([226, 152, 186]);
-/// let smile = unsafe { alloc_wg::str::from_boxed_utf8_unchecked(smile_utf8) };
-///
-/// assert_eq!("☺", &*smile);
-/// ```
 #[allow(clippy::missing_safety_doc)]
 #[inline]
 pub unsafe fn from_boxed_utf8_unchecked<A: DeallocRef>(v: Box<[u8], A>) -> Box<str, A> {

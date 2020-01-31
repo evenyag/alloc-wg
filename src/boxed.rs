@@ -784,13 +784,29 @@ where
 }
 
 #[allow(clippy::use_self)]
-impl<T, A: AllocRef> Default for Box<[T], A>
+#[cfg(feature = "use_nightly")]
+impl<T, A> Default for Box<[T], A>
 where
-    A: Default + Abort,
+    A: Default + AllocRef + Abort,
 {
     #[must_use]
     fn default() -> Self {
         Box::<[T; 0], A>::new_in([], A::default())
+    }
+}
+
+#[cfg(not(feature = "use_nightly"))]
+impl<T, A> Default for Box<[T], A>
+where
+    A: Default + AllocRef + Abort,
+{
+    #[must_use]
+    fn default() -> Self {
+        let boxed = Box::<[T; 0], A>::new_in([], A::default());
+        // `coerce_unsized` is unstable, so we convert `Box<[T; 0], A>` into raw pointer
+        // and then create a `Box<[T], A>`
+        let (ptr, b) = Box::into_raw_alloc(boxed);
+        unsafe { Self::from_raw_in(ptr, b) }
     }
 }
 
@@ -1281,6 +1297,7 @@ impl<Args, F: Fn<Args> + Copy + ?Sized, A: DeallocRef> Fn<Args> for Box<F, A> {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<T: ?Sized + core::marker::Unsize<U>, U: ?Sized, A: DeallocRef>
     core::ops::CoerceUnsized<Box<U, A>> for Box<T, A>
 {
@@ -1288,6 +1305,7 @@ impl<T: ?Sized + core::marker::Unsize<U>, U: ?Sized, A: DeallocRef>
 
 // DispatchFromDyn may only be implemented for ZSTs for now. Until this limitation is lifted,
 // implement it only for Global, and System
+#[cfg(feature = "use_nightly")]
 macro_rules! impl_dispatch_from_dyn {
     ($alloc:ty) => {
         impl<T: ?Sized + core::marker::Unsize<U>, U: ?Sized>
@@ -1297,8 +1315,10 @@ macro_rules! impl_dispatch_from_dyn {
     };
 }
 
+#[cfg(feature = "use_nightly")]
 impl_dispatch_from_dyn!(Global);
 #[cfg(feature = "std")]
+#[cfg(feature = "use_nightly")]
 impl_dispatch_from_dyn!(std::alloc::System);
 
 #[allow(clippy::items_after_statements)]

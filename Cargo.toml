@@ -17,3 +17,4 @@ maintenance = { status = "actively-developed" }
 [features]
 std = []
 default = ["std"]
+use_nightly = []

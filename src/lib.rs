@@ -51,14 +51,19 @@
 //! [`Hasher`]: https://doc.rust-lang.org/1.38.0/core/hash/trait.Hasher.html
 //! [`NonZeroLayout`]: crate::alloc::NonZeroLayout
 
-#![feature(
-    dropck_eyepatch,
+#![cfg_attr(feature = "use_nightly", feature(
     coerce_unsized,
-    const_if_match,
-    core_intrinsics,
-    str_internals,
     dispatch_from_dyn,
     unsize,
+))]
+#![feature(
+    dropck_eyepatch,
+    // coerce_unsized,
+    // const_if_match,
+    core_intrinsics,
+    str_internals,
+    // dispatch_from_dyn,
+    // unsize,
     exact_size_is_empty,
     receiver_trait,
     const_generics,
@@ -66,9 +71,9 @@
     unboxed_closures,
     specialization,
     trusted_len,
-    unsized_locals,
+    // unsized_locals,
     fn_traits,
-    exhaustive_patterns,
+    // exhaustive_patterns,
     never_type
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
