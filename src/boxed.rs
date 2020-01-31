@@ -1279,6 +1279,7 @@ impl<I: ExactSizeIterator + ?Sized, A: DeallocRef> ExactSizeIterator for Box<I, 
 
 impl<I: FusedIterator + ?Sized, A: DeallocRef> FusedIterator for Box<I, A> {}
 
+#[cfg(feature = "use_nightly")]
 impl<Args, F: FnOnce<Args> + Copy + ?Sized, A: DeallocRef> FnOnce<Args> for Box<F, A> {
     type Output = <F as FnOnce<Args>>::Output;
 
@@ -1287,12 +1288,14 @@ impl<Args, F: FnOnce<Args> + Copy + ?Sized, A: DeallocRef> FnOnce<Args> for Box<
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<Args, F: FnMut<Args> + Copy + ?Sized, A: DeallocRef> FnMut<Args> for Box<F, A> {
     extern "rust-call" fn call_mut(&mut self, args: Args) -> Self::Output {
         <F as FnMut<Args>>::call_mut(self, args)
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<Args, F: Fn<Args> + Copy + ?Sized, A: DeallocRef> Fn<Args> for Box<F, A> {
     extern "rust-call" fn call(&self, args: Args) -> Self::Output {
         <F as Fn<Args>>::call(self, args)

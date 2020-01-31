@@ -60,6 +60,8 @@
     never_type,
     exact_size_is_empty,
     receiver_trait,
+    unboxed_closures,
+    fn_traits,
 ))]
 #![feature(
     dropck_eyepatch,
@@ -73,11 +75,11 @@
     // receiver_trait,
     const_generics,
     const_generic_impls_guard,
-    unboxed_closures,
+    // unboxed_closures,
     // specialization,
     // trusted_len,
     // unsized_locals,
-    fn_traits,
+    // fn_traits,
     // exhaustive_patterns,
     // never_type
 )]
