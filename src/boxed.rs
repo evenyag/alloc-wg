@@ -766,7 +766,15 @@ fn drop_box<T: ?Sized, A: DeallocRef>(boxed: &mut Box<T, A>) {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 unsafe impl<#[may_dangle] T: ?Sized, A: DeallocRef> Drop for Box<T, A> {
+    fn drop(&mut self) {
+        drop_box(self);
+    }
+}
+
+#[cfg(not(feature = "use_nightly"))]
+impl<T: ?Sized, A: DeallocRef> Drop for Box<T, A> {
     fn drop(&mut self) {
         drop_box(self);
     }

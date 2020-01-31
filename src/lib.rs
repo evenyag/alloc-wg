@@ -64,12 +64,14 @@
     fn_traits,
     const_generics,
     const_generic_impls_guard,
+    core_intrinsics,
+    dropck_eyepatch,
 ))]
 #![feature(
-    dropck_eyepatch,
+    // dropck_eyepatch,
     // coerce_unsized,
     // const_if_match,
-    core_intrinsics,
+    // core_intrinsics,
     // str_internals,
     // dispatch_from_dyn,
     // unsize,

@@ -6,7 +6,6 @@ pub use core::alloc::GlobalAlloc;
 use core::{
     cmp,
     fmt,
-    intrinsics::likely,
     num::NonZeroUsize,
     ptr::{self, NonNull},
 };
@@ -376,8 +375,7 @@ impl ReallocRef for Global {
         old_layout: NonZeroLayout,
         new_layout: NonZeroLayout,
     ) -> Result<NonNull<u8>, Self::Error> {
-        // TODO: Test if this is a well suited case for `likely`
-        if likely(old_layout.align() == new_layout.align()) {
+        if old_layout.align() == new_layout.align() {
             #[allow(deprecated)]
             NonNull::new(realloc(
                 ptr.as_ptr(),
@@ -426,8 +424,7 @@ impl ReallocRef for System {
         old_layout: NonZeroLayout,
         new_layout: NonZeroLayout,
     ) -> Result<NonNull<u8>, Self::Error> {
-        // TODO: Test if this is a well suited case for `likely`
-        if likely(old_layout.align() == new_layout.align()) {
+        if old_layout.align() == new_layout.align() {
             NonNull::new(GlobalAlloc::realloc(
                 self,
                 ptr.as_ptr(),

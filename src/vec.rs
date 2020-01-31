@@ -89,7 +89,6 @@ use core::{
     convert::TryFrom,
     fmt,
     hash::{self, Hash},
-    intrinsics::assume,
     iter::{FromIterator, FusedIterator},
     mem,
     ops::{
@@ -1009,9 +1008,7 @@ impl<T, A: DeallocRef> Vec<T, A> {
     pub fn as_ptr(&self) -> *const T {
         // We shadow the slice method of the same name to avoid going through
         // `deref`, which creates an intermediate reference.
-        let ptr = self.buf.ptr();
-        unsafe { assume(!ptr.is_null()) };
-        ptr
+        self.buf.ptr()
     }
 
     /// Returns an unsafe mutable pointer to the vector's buffer.
@@ -1044,9 +1041,7 @@ impl<T, A: DeallocRef> Vec<T, A> {
     pub fn as_mut_ptr(&mut self) -> *mut T {
         // We shadow the slice method of the same name to avoid going through
         // `deref_mut`, which creates an intermediate reference.
-        let ptr = self.buf.ptr();
-        unsafe { assume(!ptr.is_null()) };
-        ptr
+        self.buf.ptr()
     }
 
     /// Forces the length of the vector to `new_len`.
@@ -2881,7 +2876,19 @@ impl<T: Ord, A: DeallocRef> Ord for Vec<T, A> {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 unsafe impl<#[may_dangle] T, A: DeallocRef> Drop for Vec<T, A> {
+    fn drop(&mut self) {
+        unsafe {
+            // use drop for [T]
+            ptr::drop_in_place(&mut self[..]);
+        }
+        // RawVec handles deallocation
+    }
+}
+
+#[cfg(not(feature = "use_nightly"))]
+impl<T, A: DeallocRef> Drop for Vec<T, A> {
     fn drop(&mut self) {
         unsafe {
             // use drop for [T]

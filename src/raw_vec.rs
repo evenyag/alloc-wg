@@ -874,7 +874,16 @@ impl<T, A: DeallocRef> RawVec<T, A> {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 unsafe impl<#[may_dangle] T, A: DeallocRef> Drop for RawVec<T, A> {
+    /// Frees the memory owned by the `RawVec` *without* trying to Drop its contents.
+    fn drop(&mut self) {
+        self.dealloc_buffer();
+    }
+}
+
+#[cfg(not(feature = "use_nightly"))]
+impl<T, A: DeallocRef> Drop for RawVec<T, A> {
     /// Frees the memory owned by the `RawVec` *without* trying to Drop its contents.
     fn drop(&mut self) {
         self.dealloc_buffer();
