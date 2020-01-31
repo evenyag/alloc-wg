@@ -59,6 +59,7 @@
     trusted_len,
     never_type,
     exact_size_is_empty,
+    receiver_trait,
 ))]
 #![feature(
     dropck_eyepatch,
@@ -69,7 +70,7 @@
     // dispatch_from_dyn,
     // unsize,
     // exact_size_is_empty,
-    receiver_trait,
+    // receiver_trait,
     const_generics,
     const_generic_impls_guard,
     unboxed_closures,

@@ -1219,6 +1219,7 @@ impl<T: ?Sized, A: DeallocRef> DerefMut for Box<T, A> {
     }
 }
 
+#[cfg(feature = "use_nightly")]
 impl<T: ?Sized, A: DeallocRef> core::ops::Receiver for Box<T, A> {}
 
 impl<I: Iterator + ?Sized, A: DeallocRef> Iterator for Box<I, A> {
