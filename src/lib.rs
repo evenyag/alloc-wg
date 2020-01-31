@@ -58,6 +58,7 @@
     specialization,
     trusted_len,
     never_type,
+    exact_size_is_empty,
 ))]
 #![feature(
     dropck_eyepatch,
@@ -67,7 +68,7 @@
     // str_internals,
     // dispatch_from_dyn,
     // unsize,
-    exact_size_is_empty,
+    // exact_size_is_empty,
     receiver_trait,
     const_generics,
     const_generic_impls_guard,

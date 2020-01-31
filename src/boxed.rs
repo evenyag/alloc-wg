@@ -1270,6 +1270,7 @@ impl<I: ExactSizeIterator + ?Sized, A: DeallocRef> ExactSizeIterator for Box<I, 
         (**self).len()
     }
 
+    #[cfg(feature = "use_nightly")]
     fn is_empty(&self) -> bool {
         (**self).is_empty()
     }
