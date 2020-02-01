@@ -1,8 +1,4 @@
-use core::{
-    convert::From,
-    marker::PhantomData,
-    ptr::NonNull,
-};
+use core::{convert::From, marker::PhantomData, ptr::NonNull};
 #[cfg(feature = "use_nightly")]
 use core::{
     marker::Unsize,
@@ -163,7 +159,7 @@ impl<T: ?Sized> From<Unique<T>> for NonNull<T> {
 // To compatible with old version of Rust
 #[cfg(not(feature = "use_nightly"))]
 impl<T: ?Sized> Into<NonNull<T>> for Unique<T> {
-   #[inline]
+    #[inline]
     fn into(self) -> NonNull<T> {
         unsafe { NonNull::new_unchecked(self.as_ptr()) }
     }

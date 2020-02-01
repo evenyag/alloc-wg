@@ -51,22 +51,25 @@
 //! [`Hasher`]: https://doc.rust-lang.org/1.38.0/core/hash/trait.Hasher.html
 //! [`NonZeroLayout`]: crate::alloc::NonZeroLayout
 
-#![cfg_attr(feature = "use_nightly", feature(
-    coerce_unsized,
-    dispatch_from_dyn,
-    unsize,
-    specialization,
-    trusted_len,
-    never_type,
-    exact_size_is_empty,
-    receiver_trait,
-    unboxed_closures,
-    fn_traits,
-    const_generics,
-    const_generic_impls_guard,
-    core_intrinsics,
-    dropck_eyepatch,
-))]
+#![cfg_attr(
+    feature = "use_nightly",
+    feature(
+        coerce_unsized,
+        dispatch_from_dyn,
+        unsize,
+        specialization,
+        trusted_len,
+        never_type,
+        exact_size_is_empty,
+        receiver_trait,
+        unboxed_closures,
+        fn_traits,
+        const_generics,
+        const_generic_impls_guard,
+        core_intrinsics,
+        dropck_eyepatch,
+    )
+)]
 #![cfg_attr(feature = "use_nightly", allow(incomplete_features))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![doc(test(attr(

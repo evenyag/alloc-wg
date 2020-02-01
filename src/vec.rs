@@ -84,6 +84,8 @@ use crate::{
     iter::{FromIteratorIn, TryExtend},
     raw_vec::RawVec,
 };
+#[cfg(feature = "use_nightly")]
+use core::iter::TrustedLen;
 use core::{
     cmp::{self, Ordering},
     convert::TryFrom,
@@ -101,8 +103,6 @@ use core::{
     ptr::{self, NonNull},
     slice::{self, SliceIndex},
 };
-#[cfg(feature = "use_nightly")]
-use core::iter::TrustedLen;
 
 /// A contiguous growable array type, written `Vec<T>` but pronounced 'vector'.
 ///
@@ -2591,7 +2591,10 @@ impl<T, A: ReallocRef + Abort> Vec<T, A> {
 
 #[cfg(not(feature = "use_nightly"))]
 impl<T, A: ReallocRef> Vec<T, A> {
-    fn try_from_iter_in<I: Iterator<Item = T>>(mut iter: I, a: A) -> Result<Self, CollectionAllocErr<A>> {
+    fn try_from_iter_in<I: Iterator<Item = T>>(
+        mut iter: I,
+        a: A,
+    ) -> Result<Self, CollectionAllocErr<A>> {
         // Unroll the first iteration, as the vector is going to be
         // expanded on this iteration in every case when the iterable is not
         // empty, but the loop in extend_desugared() is not going to see the
@@ -2613,7 +2616,10 @@ impl<T, A: ReallocRef> Vec<T, A> {
         Ok(vector)
     }
 
-    fn try_spec_extend<I: Iterator<Item = T>>(&mut self, iter: I) -> Result<(), CollectionAllocErr<A>> {
+    fn try_spec_extend<I: Iterator<Item = T>>(
+        &mut self,
+        iter: I,
+    ) -> Result<(), CollectionAllocErr<A>> {
         self.try_extend_desugared(iter)
     }
 }
